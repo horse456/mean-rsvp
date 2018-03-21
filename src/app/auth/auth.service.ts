@@ -44,7 +44,10 @@ export class AuthService {
      this.loggedIn = value;
    }
 
-   login() {
+   login(redirect?: string) {
+     // Set redirect after login
+     const _redirect = redirect ? redirect :this.router.url;
+     localStorage.setItem('authRedirct', _redirect);
      // Auth0 authorize request
      this._auth0.authorize();
    }
@@ -56,9 +59,10 @@ export class AuthService {
          window.location.hash = '';
          this._getProfile(authResult);
        } else if (err) {
+         this._clearRedirect();
+         this.router.navigate(['/']);
          console.error(`Error authenticating: ${err.error}`);
        }
-       this.router.navigate(['/']);
      });
    }
 
@@ -67,10 +71,28 @@ export class AuthService {
      this._auth0.client.userInfo(authResult.accessToken, (err, profile) => {
        if (profile) {
          this._setSession(authResult, profile);
+         this.router.navigate([localStorage.getItem('authRedirect') || '/']);
+         this._redirect()
+         this._clearRedirect();
        } else if (err) {
          console.error(`Error authenticating: ${err.error}`);
        }
      });
+   }
+
+   private _redirect() {
+     // Redirect with or without 'tab' query paramter
+     // Note: does not support additional params besides 'tab'
+     const fullRedirect = decodeURI(localStorage.getItem('authRedirect'));
+     const redirectArr = fullRedirect.split('?tab=');
+     const navArr = [redirectArr[0] || '/'];
+     const tabObj = redirectArr[1] ? { queryParams: { tab: redirectArr[1] }} : null;
+
+     if (!tabObj) {
+       this.router.navigate(navArr);
+     } else {
+       this.router.navigate(navArr, tabObj)
+     }
    }
 
    private _setSession(authResult, profile) {
@@ -94,6 +116,11 @@ export class AuthService {
      return roles.indexOf('admin') > -1;
    }
 
+   private _clearRedirect() {
+     // Remove redirect from localStorage
+     localStorage.removeItem('authRedirect');
+   }
+
    logout() {
      // Ensure all auth items removed from localStorage
      localStorage.removeItem('access_token');
@@ -102,6 +129,7 @@ export class AuthService {
      localStorage.removeItem('authRedirect');
 
      localStorage.removeItem('isAdmin');
+     this._clearRedirect();
      // Reset local properties, update loggedIn$ stream
      this.userProfile = undefined;
      this.isAdmin = undefined;

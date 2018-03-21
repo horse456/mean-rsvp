@@ -20,6 +20,12 @@
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact:true }">Events</a>
       </li>
+      <li><a 
+            *ngIf="auth.loggedIn && auth.isAdmin"
+            routerLink="/admin"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }">Admin</a>
+      </li>
     </ul>
   </nav>
 </header>

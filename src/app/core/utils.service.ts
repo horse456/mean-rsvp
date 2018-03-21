@@ -45,4 +45,9 @@ export class UtilsService {
     return now >= then;
   }
 
+  tabIs(currentTab: string, tab: string): boolean {
+    // Check if current tab is tab name
+    return currentTab === tab;
+  }
+
 }
