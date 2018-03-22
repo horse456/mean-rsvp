@@ -42,9 +42,9 @@
   */
 
   //Get api root
-  app.get('/api/',(req,res)=>{
-    res.send('API works');
-    });
+//   app.get('/api/',(req,res)=>{
+//     res.send('API works');
+//     });
 
 
   // Check for an authenticatec admin user
@@ -68,7 +68,7 @@
           }
           if (events) {
               events.forEach(event => {
-                  eventsArr.pust(event);
+                  eventsArr.push(event);
               });
           }
           res.send(eventsArr);
@@ -85,7 +85,7 @@
           }
           if (events) {
               events.forEach( event => {
-                  eventsArr.pust(event);
+                  eventsArr.push(event);
               });
           }
           res.send(eventsArr);

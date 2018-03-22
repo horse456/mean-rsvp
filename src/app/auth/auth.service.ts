@@ -91,7 +91,7 @@ export class AuthService {
      if (!tabObj) {
        this.router.navigate(navArr);
      } else {
-       this.router.navigate(navArr, tabObj)
+       this.router.navigate(navArr, tabObj);
      }
    }
 
@@ -100,7 +100,8 @@ export class AuthService {
      const expiresAt = JSON.stringify((authResult.expiresIn * 1000) + Date.now());
      // set tokens and expiration in localStorage and props
      localStorage.setItem('access_token', authResult.accessToken);
-     localStorage.setItem('expires_at', JSON.stringify(profile));
+     localStorage.setItem('expires_at', expiresAt);
+     localStorage.setItem('profile', JSON.stringify(profile))
 
      this.isAdmin = this._checkAdmin(profile);
      localStorage.setItem('isAdmin', this.isAdmin.toString());
