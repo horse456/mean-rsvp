@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from './../auth/auth.service';
 import { Observable } from 'rxjs/Observable';
-import { catchError } from 'rxjs/operators';
+import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 import { ENV } from './env.config';
 import { EventModel } from './models/event.model';
@@ -23,9 +23,7 @@ export class ApiService {
   getEvents$(): Observable<EventModel[]> {
     return this.http
       .get(`${ENV.BASE_API}events`)
-      .pipe(
-        catchError((error) => this._handleError(error))
-      );
+      .catch(this._handleError);
   }
 
   // Get all events - private and public (admin only)
@@ -34,9 +32,7 @@ export class ApiService {
       .get(`${ENV.BASE_API}events/admin`, {
         headers: new HttpHeaders().set('Authorization', this._authHeader)
       })
-      .pipe(
-        catchError((error) => this._handleError(error))
-      );
+      .catch(this._handleError);
   }
 
 
@@ -46,9 +42,7 @@ export class ApiService {
       .get(`${ENV.BASE_API}event/${id}`, {
         headers: new HttpHeaders().set('Authorization', this._authHeader)
       })
-      .pipe(
-        catchError((error) => this._handleError(error))
-      );
+      .catch(this._handleError);
   }
 
   // Get rsvps by event ID (login required)
@@ -57,17 +51,33 @@ export class ApiService {
       .get(`${ENV.BASE_API}event/${eventId}/rsvps`, {
         headers: new HttpHeaders().set('Authorization', this._authHeader)
       })
-      .pipe(
-        catchError((error) => this._handleError(error))
-      );
+      .catch(this._handleError);
   }
 
-  private _handleError(err: HttpErrorResponse | any): Observable<any> {
-    const errorMsg = err.message || `Error: Unable to complete request.`;
-    if (err.message && err.message.indexOf('No JWT prsent') > -1) {
+  private _handleError(err: HttpErrorResponse | any) {
+    const errorMsg = err.message || 'Error: Unable to complete request.';
+    if (err.message && err.message.indexOf('No JWT present') > -1) {
       this.auth.login();
     }
     return Observable.throw(errorMsg);
   }
+
+  // Post new RSVP (login required)
+  postRsvp$(rsvp: RsvpModel): Observable<RsvpModel> {
+    return this.http
+      .post(`${ENV.BASE_API}rsvp/new`, rsvp, {
+        headers: new HttpHeaders().set('Authorization', this._authHeader)
+      })
+      .catch(this._handleError)
+  }
+
+  // Put existing RSVP (login required)
+  editRsvp$(id: string, rsvp: RsvpModel): Observable<RsvpModel> {
+    return this.http
+      .put(`${ENV.BASE_API}rsvp/${id}`, rsvp, {
+        headers: new HttpHeaders().set('Authorization', this._authHeader)
+      })
+      .catch(this._handleError)
+  };
 
 }
